@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Candidate Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #0b1224;
+      --panel: #10192f;
+      --accent: #2563eb;
+      --accent-2: #22c55e;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #1f2a44;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(120% 120% at 50% 10%, #1d2a4a 0%, #0b1020 40%, #060915 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(37,99,235,0.25), rgba(34,197,94,0.2));
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.35);
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tab {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: rgba(37,99,235,0.2);
+      color: var(--accent);
+    }
+    .tab:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+      margin-bottom: 18px;
+    }
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      letter-spacing: 0.1px;
+    }
+    .field {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    input, select, button {
+      font-size: 14px;
+      font-family: inherit;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0c1326;
+      color: var(--text);
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      box-shadow: 0 10px 30px rgba(37,99,235,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    .btn-danger {
+      background: rgba(239,68,68,0.2);
+      color: #fca5a5;
+      border-color: rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.3);
+    }
+    .btn-warning {
+      background: rgba(245,158,11,0.2);
+      color: #fcd34d;
+      border-color: rgba(245,158,11,0.3);
+    }
+    .btn-warning:hover {
+      background: rgba(245,158,11,0.3);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .status.error { color: #f87171; }
+    .status.success { color: #22c55e; }
+    .status.info { color: #60a5fa; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .slot-card {
+      background: #0c1326;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .slot-meta {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .slot-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(37,99,235,0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(37,99,235,0.35);
+    }
+    .badge-success {
+      background: rgba(34,197,94,0.15);
+      color: #86efac;
+      border-color: rgba(34,197,94,0.35);
+    }
+    .badge-warning {
+      background: rgba(245,158,11,0.15);
+      color: #fcd34d;
+      border-color: rgba(245,158,11,0.35);
+    }
+    .empty {
+      text-align: center;
+      padding: 32px 12px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: #0b1224;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    td {
+      font-size: 14px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .modal-header h3 {
+      margin: 0;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .close-btn:hover {
+      color: var(--text);
+    }
+    .confirmation-banner {
+      background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1));
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+      display: none;
+    }
+    .confirmation-banner.active {
+      display: block;
+    }
+    .confirmation-banner h4 {
+      margin: 0 0 8px 0;
+      color: #86efac;
+    }
+    .confirmation-banner p {
+      margin: 4px 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .current-booking-card {
+      background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(37,99,235,0.05));
+      border: 2px solid rgba(37,99,235,0.3);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .current-booking-card h4 {
+      margin: 0 0 12px 0;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .current-booking-card .badge-large {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    .success-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+    .success-modal.active {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .success-modal-content {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(37,99,235,0.15));
+      border: 2px solid rgba(34,197,94,0.5);
+      border-radius: 18px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: scaleIn 0.5s ease;
+    }
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+      }
+      to {
+        transform: scale(1);
+      }
+    }
+    .success-modal-content h2 {
+      margin: 0 0 16px 0;
+      font-size: 28px;
+      color: #86efac;
+      font-weight: 700;
+    }
+    .success-modal-content p {
+      margin: 8px 0;
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .success-modal-content .booking-details {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .success-modal-content .booking-details strong {
+      color: var(--accent-2);
+    }
+    .success-modal-btn {
+      margin-top: 24px;
+      padding: 12px 24px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <h1>Candidate Dashboard</h1>
+    <p>Book interview slots, manage your bookings, and view available time slots</p>
+  </div>
+
+  <div id="loginPanel" class="panel">
+    <h3>Candidate Login Required</h3>
+    <p style="color: var(--muted); margin-bottom: 16px;">Please login to access your dashboard.</p>
+      <button class="btn btn-primary" onclick="window.location.href='login.html'">
+        Go to Login Page
+      </button>
+  </div>
+
+  <div id="dashboard" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <div>
+        <div style="font-size: 14px; color: var(--muted);">Logged in as</div>
+        <div style="font-weight: 600; font-size: 16px;" id="loggedInUser"></div>
+      </div>
+      <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    </div>
+    <div id="confirmationBanner" class="confirmation-banner">
+      <h4>✓ Booking Confirmed!</h4>
+      <p id="confirmationMessage"></p>
+    </div>
+
+    <div id="currentBookingCard" class="current-booking-card" style="display: none;">
+      <h4>
+        <span class="badge badge-success badge-large">Active Booking</span>
+        Your Current Interview Slot
+      </h4>
+      <div id="currentBookingDetails"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="slots">Available Slots</button>
+      <button class="tab" data-tab="bookings">My Bookings</button>
+    </div>
+
+    <div id="tab-slots" class="tab-content active">
+      <div class="panel">
+        <h3>Search Filters</h3>
+        <div class="grid">
+          <div class="field">
+            <label for="interviewerIdFilter">Interviewer ID (optional)</label>
+            <input type="number" id="interviewerIdFilter" placeholder="Filter by interviewer" />
+          </div>
+          <div class="field">
+            <label for="fromDateFilter">From Date</label>
+            <input type="date" id="fromDateFilter" />
+          </div>
+          <div class="field">
+            <label for="toDateFilter">To Date</label>
+            <input type="date" id="toDateFilter" />
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="loadSlotsBtn">Load Slots</button>
+          <button class="btn btn-ghost" id="clearFiltersBtn">Clear Filters</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="toolbar" style="justify-content: space-between;">
+          <div>
+            <strong>Available Slots</strong>
+            <div id="slotCount" style="color:var(--muted); font-size:12px; margin-top:2px;"></div>
+          </div>
+          <button class="btn btn-ghost" id="refreshSlotsBtn">↻ Refresh</button>
+        </div>
+        <div class="grid" id="slotsContainer"></div>
+      </div>
+    </div>
+
+    <div id="tab-bookings" class="tab-content">
+      <div class="panel">
+        <h3>My Bookings</h3>
+        <div id="bookingsContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="success-modal">
+  <div class="success-modal-content">
+    <div class="success-icon">🎉</div>
+    <h2>Congratulations!</h2>
+    <p style="font-size: 18px; font-weight: 600; color: #86efac;">Your slot is booked!</p>
+    <div class="booking-details" id="successModalDetails">
+      <!-- Booking details will be inserted here -->
+    </div>
+    <button class="btn btn-primary success-modal-btn" onclick="closeSuccessModal()">Great!</button>
+  </div>
+</div>
+
+<!-- Change Slot Modal -->
+<div id="changeSlotModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Change Booking Slot</h3>
+      <button class="close-btn" onclick="closeChangeSlotModal()">&times;</button>
+    </div>
+    <div class="field">
+      <label>Select New Slot</label>
+      <select id="newSlotSelect"></select>
+    </div>
+    <div class="status" id="changeSlotStatus"></div>
+    <div style="display: flex; gap: 10px; margin-top: 18px;">
+      <button class="btn btn-primary" id="confirmChangeBtn">Change Slot</button>
+      <button class="btn btn-ghost" onclick="closeChangeSlotModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let candidateName = '';
+  let candidateEmail = '';
+  let currentBookingToChange = null;
+  let availableSlotsForChange = [];
+  let hasActiveBooking = false;
+
+  document.getElementById('loadSlotsBtn').addEventListener('click', () => loadSlots(true));
+  document.getElementById('refreshSlotsBtn').addEventListener('click', () => loadSlots(true));
+  document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
+  document.getElementById('confirmChangeBtn').addEventListener('click', confirmChangeSlot);
+
+  // Check if user is logged in
+  function checkLogin() {
+    const storedName = sessionStorage.getItem('candidateName');
+    const storedEmail = sessionStorage.getItem('candidateEmail');
+
+    if (storedName && storedEmail) {
+      candidateName = storedName;
+      candidateEmail = storedEmail;
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('loggedInUser').textContent = `${candidateName} (${candidateEmail})`;
+      loadBookings().then(() => {
+        loadSlots(true);
+      });
+    } else {
+      document.getElementById('loginPanel').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem('candidateName');
+    sessionStorage.removeItem('candidateEmail');
+    window.location.href = 'login.html';
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      if (tabName === 'bookings') loadBookings();
+    });
+  });
+
+  // Initialize on page load
+  window.addEventListener('load', checkLogin);
+
+  async function loadSlots(resetCursor = true) {
+    try {
+      setStatus('infoStatus', 'Loading slots...', 'info');
+      const interviewerId = document.getElementById('interviewerIdFilter').value;
+      const fromDate = document.getElementById('fromDateFilter').value;
+      const toDate = document.getElementById('toDateFilter').value;
+
+      const params = new URLSearchParams();
+      params.append('limit', '50');
+      params.append('cursor', '0');
+      if (interviewerId) params.append('interviewerId', interviewerId);
+      if (fromDate) params.append('from', `${fromDate}T00:00:00`);
+      if (toDate) params.append('to', `${toDate}T23:59:59`);
+
+      const res = await fetch('/api/v1/slots?' + params.toString());
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus('infoStatus', err.message || 'Failed to load slots', 'error');
+        return;
+      }
+
+      const data = await res.json();
+      const slots = data.items || [];
+      renderSlots(slots);
+      setStatus('infoStatus', '', '');
+    } catch (e) {
+      console.error(e);
+      setStatus('infoStatus', 'Error loading slots', 'error');
+    }
+  }
+
+  function renderSlots(slots) {
+    const container = document.getElementById('slotsContainer');
+    const countEl = document.getElementById('slotCount');
+    
+    countEl.textContent = `${slots.length} slot(s) available`;
+
+    if (slots.length === 0) {
+      container.innerHTML = '<div class="empty">No slots found. Try different filters or check back later.</div>';
+      return;
+    }
+
+    const now = new Date();
+    const availableSlots = slots.filter(slot => {
+      const slotDate = new Date(slot.startTime);
+      return slotDate >= now && slot.availableCapacity > 0;
+    });
+
+    if (availableSlots.length === 0) {
+      container.innerHTML = '<div class="empty">No available slots match your criteria.</div>';
+      return;
+    }
+
+    container.innerHTML = availableSlots.map(slot => {
+      const startDate = new Date(slot.startTime);
+      const endDate = new Date(slot.endTime);
+      const disabled = hasActiveBooking;
+      return `
+        <div class="slot-card">
+          <div class="slot-title">Slot #${slot.slotId}</div>
+          <div class="slot-meta">
+            <div><span class="badge">Interviewer ${slot.interviewerId}</span></div>
+            <div><strong>Start:</strong> ${startDate.toLocaleString()}</div>
+            <div><strong>End:</strong> ${endDate.toLocaleString()}</div>
+            <div><strong>Available:</strong> <span class="badge badge-success">${slot.availableCapacity} slot(s)</span></div>
+          </div>
+          <button class="btn btn-primary" onclick="bookSlot(${slot.slotId})" ${disabled ? 'disabled' : ''}>
+            ${hasActiveBooking ? 'You already have a booking' : 'Book This Slot'}
+          </button>
+          ${hasActiveBooking ? '<div style="font-size: 12px; color: var(--muted); margin-top: 8px;">Cancel or update your existing booking to book a new slot</div>' : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function bookSlot(slotId) {
+    if (!candidateName || !candidateEmail) {
+      setStatus('infoStatus', 'Please enter your name and email first', 'error');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to book this slot?')) {
+      return;
+    }
+
+    try {
+      setStatus('infoStatus', 'Booking slot...', 'info');
+      const res = await fetch('/api/v1/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slotId: slotId,
+          candidateName: candidateName,
+          candidateEmail: candidateEmail
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus('infoStatus', err.message || 'Failed to book slot', 'error');
+        return;
+      }
+
+      // Show success modal pop-up
+      const successModal = document.getElementById('successModal');
+      const successModalDetails = document.getElementById('successModalDetails');
+      
+      // Get slot details for confirmation
+      try {
+        const slotRes = await fetch(`/api/v1/slots?limit=100`);
+        if (slotRes.ok) {
+          const slotData = await slotRes.json();
+          const slot = (slotData.items || []).find(s => s.slotId === slotId);
+          if (slot) {
+            const startDate = new Date(slot.startTime);
+            const endDate = new Date(slot.endTime);
+            successModalDetails.innerHTML = `
+              <div style="margin-bottom: 8px;"><strong>Slot ID:</strong> #${slotId}</div>
+              <div style="margin-bottom: 8px;"><strong>Interviewer ID:</strong> ${slot.interviewerId}</div>
+              <div style="margin-bottom: 8px;"><strong>Date & Time:</strong> ${startDate.toLocaleString()}</div>
+              <div style="margin-bottom: 8px;"><strong>End Time:</strong> ${endDate.toLocaleString()}</div>
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: var(--muted);">
+                You can view and manage your booking in the "My Bookings" tab.
+              </div>
+            `;
+          } else {
+            successModalDetails.innerHTML = `
+              <div style="margin-bottom: 8px;"><strong>Slot ID:</strong> #${slotId}</div>
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: var(--muted);">
+                You can view and manage your booking in the "My Bookings" tab.
+              </div>
+            `;
+          }
+        } else {
+          successModalDetails.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>Slot ID:</strong> #${slotId}</div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: var(--muted);">
+              You can view and manage your booking in the "My Bookings" tab.
+            </div>
+          `;
+        }
+      } catch (e) {
+        successModalDetails.innerHTML = `
+          <div style="margin-bottom: 8px;"><strong>Slot ID:</strong> #${slotId}</div>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 14px; color: var(--muted);">
+            You can view and manage your booking in the "My Bookings" tab.
+          </div>
+        `;
+      }
+      
+      // Show success modal
+      successModal.classList.add('active');
+
+      // Also show confirmation banner
+      const banner = document.getElementById('confirmationBanner');
+      const message = document.getElementById('confirmationMessage');
+      message.innerHTML = `
+        <strong>Your interview has been scheduled!</strong><br>
+        Slot #${slotId}<br>
+        You can view and manage your booking in the "My Bookings" tab.
+      `;
+      banner.classList.add('active');
+      setTimeout(() => banner.classList.remove('active'), 10000);
+
+      setStatus('infoStatus', 'Slot booked successfully!', 'success');
+      loadSlots(true);
+      loadBookings();
+    } catch (e) {
+      console.error(e);
+      setStatus('infoStatus', 'Error booking slot', 'error');
+    }
+  }
+
+  async function loadBookings() {
+    if (!candidateEmail) return Promise.resolve();
+
+    try {
+      const res = await fetch(`/api/v1/bookings/by-candidate?candidateEmail=${encodeURIComponent(candidateEmail)}`);
+      if (!res.ok) {
+        document.getElementById('bookingsContainer').innerHTML = '<div class="empty">Error loading bookings</div>';
+        return Promise.resolve();
+      }
+
+      const bookings = await res.json();
+
+      const now = new Date();
+      const upcoming = bookings.filter(b => new Date(b.startTime) >= now);
+      const past = bookings.filter(b => new Date(b.startTime) < now);
+
+      // Update active booking status
+      hasActiveBooking = upcoming.length > 0;
+      
+      // Show/hide current booking card
+      const currentBookingCard = document.getElementById('currentBookingCard');
+      const currentBookingDetails = document.getElementById('currentBookingDetails');
+      
+      if (hasActiveBooking && upcoming.length > 0) {
+        const current = upcoming[0];
+        const startDate = new Date(current.startTime);
+        const endDate = new Date(current.endTime);
+        currentBookingDetails.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div><strong>Slot ID:</strong> ${current.slotId}</div>
+            <div><strong>Interviewer ID:</strong> ${current.interviewerId}</div>
+            <div><strong>Start Time:</strong> ${startDate.toLocaleString()}</div>
+            <div><strong>End Time:</strong> ${endDate.toLocaleString()}</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-warning" onclick="openChangeSlotModal(${current.bookingId})">Change Slot</button>
+            <button class="btn btn-danger" onclick="cancelBooking(${current.bookingId})">Cancel Booking</button>
+          </div>
+        `;
+        currentBookingCard.style.display = 'block';
+      } else {
+        currentBookingCard.style.display = 'none';
+      }
+
+      if (bookings.length === 0) {
+        document.getElementById('bookingsContainer').innerHTML = '<div class="empty">You have no bookings. Book a slot to get started!</div>';
+        return Promise.resolve();
+      }
+
+      let html = '<h4 style="margin-top: 0;">Upcoming Bookings</h4>';
+      if (upcoming.length === 0) {
+        html += '<div class="empty">No upcoming bookings</div>';
+      } else {
+        html += '<table><thead><tr><th>Slot ID</th><th>Interviewer ID</th><th>Start Time</th><th>End Time</th><th>Actions</th></tr></thead><tbody>';
+        html += upcoming.map(booking => {
+          const startDate = new Date(booking.startTime);
+          const endDate = new Date(booking.endTime);
+          return `
+            <tr>
+              <td>${booking.slotId}</td>
+              <td>${booking.interviewerId}</td>
+              <td>${startDate.toLocaleString()}</td>
+              <td>${endDate.toLocaleString()}</td>
+              <td>
+                <button class="btn btn-warning btn-sm" onclick="openChangeSlotModal(${booking.bookingId})" style="padding: 6px 10px; font-size: 12px;">Change</button>
+                <button class="btn btn-danger btn-sm" onclick="cancelBooking(${booking.bookingId})" style="padding: 6px 10px; font-size: 12px;">Cancel</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        html += '</tbody></table>';
+      }
+
+      if (past.length > 0) {
+        html += '<h4 style="margin-top: 24px;">Past Bookings</h4>';
+        html += '<table><thead><tr><th>Slot ID</th><th>Interviewer ID</th><th>Start Time</th><th>End Time</th></tr></thead><tbody>';
+        html += past.map(booking => {
+          const startDate = new Date(booking.startTime);
+          const endDate = new Date(booking.endTime);
+          return `
+            <tr>
+              <td>${booking.slotId}</td>
+              <td>${booking.interviewerId}</td>
+              <td>${startDate.toLocaleString()}</td>
+              <td>${endDate.toLocaleString()}</td>
+            </tr>
+          `;
+        }).join('');
+        html += '</tbody></table>';
+      }
+
+      document.getElementById('bookingsContainer').innerHTML = html;
+      return Promise.resolve();
+    } catch (e) {
+      console.error(e);
+      document.getElementById('bookingsContainer').innerHTML = '<div class="empty">Error loading bookings</div>';
+    }
+  }
+
+  async function openChangeSlotModal(bookingId) {
+    currentBookingToChange = bookingId;
+    
+    try {
+      // Load available slots
+      const res = await fetch('/api/v1/slots?limit=100&hideFull=false');
+      const data = await res.json();
+      const now = new Date();
+      availableSlotsForChange = (data.items || []).filter(slot => {
+        const slotDate = new Date(slot.startTime);
+        return slotDate >= now && slot.availableCapacity > 0;
+      });
+
+      const select = document.getElementById('newSlotSelect');
+      if (availableSlotsForChange.length === 0) {
+        select.innerHTML = '<option>No available slots</option>';
+        select.disabled = true;
+      } else {
+        select.innerHTML = '<option value="">Select a slot</option>' + availableSlotsForChange.map(slot => {
+          const date = new Date(slot.startTime);
+          return `<option value="${slot.slotId}">Slot #${slot.slotId} - ${date.toLocaleString()} (Interviewer ${slot.interviewerId})</option>`;
+        }).join('');
+        select.disabled = false;
+      }
+
+      document.getElementById('changeSlotModal').classList.add('active');
+    } catch (e) {
+      console.error(e);
+      setStatus('changeSlotStatus', 'Error loading slots', 'error');
+    }
+  }
+
+  function closeSuccessModal() {
+    document.getElementById('successModal').classList.remove('active');
+  }
+
+  function closeChangeSlotModal() {
+    document.getElementById('changeSlotModal').classList.remove('active');
+    currentBookingToChange = null;
+    document.getElementById('newSlotSelect').value = '';
+    setStatus('changeSlotStatus', '', '');
+  }
+
+  async function confirmChangeSlot() {
+    const newSlotId = document.getElementById('newSlotSelect').value;
+    if (!newSlotId) {
+      setStatus('changeSlotStatus', 'Please select a slot', 'error');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to change to this slot?')) {
+      return;
+    }
+
+    try {
+      setStatus('changeSlotStatus', 'Changing slot...', 'info');
+      const res = await fetch(`/api/v1/bookings/${currentBookingToChange}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newSlotId: parseInt(newSlotId) })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus('changeSlotStatus', err.message || 'Failed to change slot', 'error');
+        return;
+      }
+
+      setStatus('changeSlotStatus', 'Slot changed successfully!', 'success');
+      setTimeout(() => {
+        closeChangeSlotModal();
+        loadBookings();
+        loadSlots(true);
+      }, 1000);
+    } catch (e) {
+      console.error(e);
+      setStatus('changeSlotStatus', 'Error changing slot', 'error');
+    }
+  }
+
+  async function cancelBooking(bookingId) {
+    if (!confirm('Are you sure you want to cancel this booking?')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/v1/bookings/${bookingId}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) {
+        alert('Failed to cancel booking');
+        return;
+      }
+
+      alert('Booking cancelled successfully!');
+      loadBookings();
+      loadSlots(true);
+    } catch (e) {
+      console.error(e);
+      alert('Error cancelling booking');
+    }
+  }
+
+  function clearFilters() {
+    document.getElementById('interviewerIdFilter').value = '';
+    document.getElementById('fromDateFilter').value = '';
+    document.getElementById('toDateFilter').value = '';
+    loadSlots(true);
+  }
+
+  function setStatus(id, message, type) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = message || '';
+      el.className = 'status ' + (type || '');
+    }
+  }
+
+  // Set default dates
+  (() => {
+    const today = new Date();
+    const to = new Date();
+    to.setDate(today.getDate() + 14);
+    document.getElementById('fromDateFilter').value = today.toISOString().slice(0,10);
+    document.getElementById('toDateFilter').value = to.toISOString().slice(0,10);
+  })();
+
+  // Close success modal when clicking outside
+  document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeSuccessModal();
+    }
+  });
+
+  // Make functions available globally
+  window.bookSlot = bookSlot;
+  window.openChangeSlotModal = openChangeSlotModal;
+  window.closeChangeSlotModal = closeChangeSlotModal;
+  window.cancelBooking = cancelBooking;
+  window.closeSuccessModal = closeSuccessModal;
+</script>
+</body>
+</html>
+

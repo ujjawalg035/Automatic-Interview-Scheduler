@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interviewer Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #0b1224;
+      --panel: #10192f;
+      --accent: #2563eb;
+      --accent-2: #22c55e;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #1f2a44;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(120% 120% at 50% 10%, #1d2a4a 0%, #0b1020 40%, #060915 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+    .hero {
+      background: linear-gradient(135deg, rgba(37,99,235,0.25), rgba(34,197,94,0.2));
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.35);
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tab {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: rgba(37,99,235,0.2);
+      color: var(--accent);
+    }
+    .tab:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+      margin-bottom: 18px;
+    }
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      letter-spacing: 0.1px;
+    }
+    .field {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    input, select, textarea, button {
+      font-size: 14px;
+      font-family: inherit;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0c1326;
+      color: var(--text);
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      box-shadow: 0 10px 30px rgba(37,99,235,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    .btn-danger {
+      background: rgba(239,68,68,0.2);
+      color: #fca5a5;
+      border-color: rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.3);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .status.error { color: #f87171; }
+    .status.success { color: #22c55e; }
+    .status.info { color: #60a5fa; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .stat-card {
+      background: #0c1326;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    td {
+      font-size: 14px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(37,99,235,0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(37,99,235,0.35);
+    }
+    .badge-success {
+      background: rgba(34,197,94,0.15);
+      color: #86efac;
+      border-color: rgba(34,197,94,0.35);
+    }
+    .badge-warning {
+      background: rgba(245,158,11,0.15);
+      color: #fcd34d;
+      border-color: rgba(245,158,11,0.35);
+    }
+    .empty {
+      text-align: center;
+      padding: 32px 12px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: #0b1224;
+    }
+    .availability-item {
+      background: #0c1326;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .availability-details {
+      flex: 1;
+    }
+    .availability-day {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .availability-time {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <h1>Interviewer Dashboard</h1>
+    <p>Manage your availability, generate slots, and view your bookings</p>
+  </div>
+
+  <div id="loginPanel" class="panel">
+    <h3>Interviewer Login Required</h3>
+    <p style="color: var(--muted); margin-bottom: 16px;">Please login to access your dashboard.</p>
+      <button class="btn btn-primary" onclick="window.location.href='login.html'">
+        Go to Login Page
+      </button>
+  </div>
+
+  <div id="dashboard" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <div>
+        <div style="font-size: 14px; color: var(--muted);">Logged in as</div>
+        <div style="font-weight: 600; font-size: 16px;" id="loggedInUser"></div>
+      </div>
+      <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    </div>
+    <div class="stats" id="statsContainer"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="info">Profile</button>
+      <button class="tab" data-tab="availability">Availability</button>
+      <button class="tab" data-tab="slots">Slots</button>
+      <button class="tab" data-tab="bookings">Bookings</button>
+    </div>
+
+    <div id="tab-info" class="tab-content active">
+      <div class="panel">
+        <h3>Interviewer Information</h3>
+        <div id="interviewerInfo"></div>
+        <div class="field" style="margin-top: 16px;">
+          <label for="maxWeeklyInput">Max Weekly Interviews</label>
+          <input type="number" id="maxWeeklyInput" min="1" />
+        </div>
+        <button class="btn btn-primary" id="updateMaxBtn">Update Max Weekly</button>
+        <div class="status" id="updateStatus"></div>
+      </div>
+    </div>
+
+    <div id="tab-availability" class="tab-content">
+      <div class="panel">
+        <h3>Current Weekly Availability</h3>
+        <div id="currentAvailability">
+          <div class="empty">Loading availability...</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Set Weekly Availability</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">
+          Select days and set your available time windows. Each day can have one time window with a specific slot duration.
+        </p>
+        <div id="availabilityForm">
+          <div class="empty">Loading form...</div>
+        </div>
+        <button class="btn btn-primary" id="saveAvailabilityBtn">Save Availability</button>
+        <div class="status" id="availabilityStatus"></div>
+      </div>
+    </div>
+
+    <div id="tab-slots" class="tab-content">
+      <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="margin: 0;">Generate Slots</h3>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="slotFromDate">From Date</label>
+            <input type="date" id="slotFromDate" />
+          </div>
+          <div class="field">
+            <label for="slotToDate">To Date</label>
+            <input type="date" id="slotToDate" />
+          </div>
+        </div>
+        <button class="btn btn-primary" id="generateSlotsBtn">Generate Slots</button>
+        <div class="status" id="generateStatus"></div>
+      </div>
+      <div class="panel">
+        <h3>Your Slots</h3>
+        <div id="slotsContainer"></div>
+      </div>
+    </div>
+
+    <div id="tab-bookings" class="tab-content">
+      <div class="panel">
+        <h3>Your Bookings</h3>
+        <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">
+          View and manage all bookings for your interview slots. You can delete bookings to make slots available again.
+        </p>
+        <div id="bookingsContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentInterviewerId = null;
+  let availabilityItems = [];
+
+  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+
+  document.getElementById('updateMaxBtn').addEventListener('click', updateMaxWeekly);
+  document.getElementById('saveAvailabilityBtn').addEventListener('click', saveAvailability);
+  document.getElementById('generateSlotsBtn').addEventListener('click', generateSlots);
+
+  // Check if user is logged in
+  function checkLogin() {
+    const interviewerId = sessionStorage.getItem('interviewerId');
+    const interviewerName = sessionStorage.getItem('interviewerName');
+    const interviewerEmail = sessionStorage.getItem('interviewerEmail');
+
+    if (interviewerId && interviewerName && interviewerEmail) {
+      currentInterviewerId = interviewerId;
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('loggedInUser').innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>${interviewerName}</span>
+          <span class="badge" style="font-size: 11px; padding: 3px 8px;">ID: ${interviewerId}</span>
+        </div>
+        <div style="font-size: 13px; color: var(--muted); font-weight: normal; margin-top: 4px;">${interviewerEmail}</div>
+      `;
+      loadDashboard();
+    } else {
+      document.getElementById('loginPanel').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem('interviewerId');
+    sessionStorage.removeItem('interviewerName');
+    sessionStorage.removeItem('interviewerEmail');
+    window.location.href = 'login.html';
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      if (tabName === 'availability') loadAvailability();
+      if (tabName === 'slots') loadSlots();
+      if (tabName === 'bookings') loadBookings();
+    });
+  });
+
+  // Initialize on page load
+  window.addEventListener('load', checkLogin);
+
+  async function loadDashboard() {
+    await Promise.all([
+      loadInterviewerInfo(),
+      loadAvailability(),
+      loadStats(),
+      loadSlots(),
+      loadBookings()
+    ]);
+  }
+
+  async function loadInterviewerInfo() {
+    try {
+      const res = await fetch(`/api/v1/interviewers/${currentInterviewerId}`);
+      const interviewer = await res.json();
+      document.getElementById('interviewerInfo').innerHTML = `
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Interviewer ID</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--accent);">
+            <span class="badge" style="font-size: 16px; padding: 6px 12px;">${interviewer.id}</span>
+          </div>
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <div><strong>Name:</strong> ${interviewer.name}</div>
+          <div style="margin-top: 8px;"><strong>Email:</strong> ${interviewer.email}</div>
+          <div style="margin-top: 8px;"><strong>Max Weekly Interviews:</strong> ${interviewer.maxWeeklyInterviews}</div>
+        </div>
+      `;
+      document.getElementById('maxWeeklyInput').value = interviewer.maxWeeklyInterviews;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const [bookingsRes, slotsRes] = await Promise.all([
+        fetch(`/api/v1/bookings/by-interviewer/${currentInterviewerId}`),
+        fetch(`/api/v1/slots?interviewerId=${currentInterviewerId}&limit=100`)
+      ]);
+      const bookings = await bookingsRes.json();
+      const slots = await slotsRes.json();
+
+      const now = new Date();
+      const thisWeekBookings = bookings.filter(b => {
+        const slotDate = new Date(b.startTime);
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay() + 1);
+        weekStart.setHours(0,0,0,0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23,59,59,999);
+        return slotDate >= weekStart && slotDate <= weekEnd;
+      });
+
+      document.getElementById('statsContainer').innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${bookings.length}</div>
+          <div class="stat-label">Total Bookings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${thisWeekBookings.length}</div>
+          <div class="stat-label">This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${slots.items.length}</div>
+          <div class="stat-label">Total Slots</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${slots.items.filter(s => s.availableCapacity > 0).length}</div>
+          <div class="stat-label">Available Slots</div>
+        </div>
+      `;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function loadAvailability() {
+    try {
+      console.log('Loading availability for interviewer:', currentInterviewerId);
+      const res = await fetch(`/api/v1/interviewers/${currentInterviewerId}/weekly-availability`);
+      
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: 'Failed to load availability' }));
+        console.error('Error loading availability:', error);
+        document.getElementById('currentAvailability').innerHTML = `<div class="empty">Error loading availability: ${error.message || 'Unknown error'}</div>`;
+        document.getElementById('availabilityForm').innerHTML = '<div class="empty">Error loading form. Please refresh the page.</div>';
+        return;
+      }
+      
+      const availability = await res.json();
+      console.log('Loaded availability:', availability);
+      
+      // Ensure availability is an array
+      const availabilityArray = Array.isArray(availability) ? availability : [];
+      
+      if (!availabilityArray || availabilityArray.length === 0) {
+        document.getElementById('currentAvailability').innerHTML = '<div class="empty">No availability set. Add availability below to get started.</div>';
+      } else {
+        document.getElementById('currentAvailability').innerHTML = availabilityArray.map(a => {
+          // Format time - LocalTime might come as "HH:mm:ss" but we need "HH:mm" for display
+          const startTime = a.startTime ? (a.startTime.includes(':') ? a.startTime.substring(0, 5) : a.startTime) : '';
+          const endTime = a.endTime ? (a.endTime.includes(':') ? a.endTime.substring(0, 5) : a.endTime) : '';
+          return `
+          <div class="availability-item">
+            <div class="availability-details">
+              <div class="availability-day">${a.dayOfWeek}</div>
+              <div class="availability-time">${startTime} - ${endTime} (${a.slotDurationMinutes} min slots)</div>
+            </div>
+          </div>
+        `;
+        }).join('');
+      }
+
+      // Build form and pre-populate with existing availability
+      availabilityItems = [];
+      const formHtml = days.map(day => {
+        // Find existing availability for this day (case-insensitive comparison)
+        const existing = availabilityArray.find(a => a && a.dayOfWeek && a.dayOfWeek.toUpperCase() === day.toUpperCase());
+        
+        // Format time for HTML time input (needs HH:mm format)
+        let startValue = '';
+        let endValue = '';
+        if (existing) {
+          // LocalTime serializes as "HH:mm:ss", but HTML time input needs "HH:mm"
+          startValue = existing.startTime ? (existing.startTime.includes(':') ? existing.startTime.substring(0, 5) : existing.startTime) : '';
+          endValue = existing.endTime ? (existing.endTime.includes(':') ? existing.endTime.substring(0, 5) : existing.endTime) : '';
+        }
+        
+        const durationValue = existing ? existing.slotDurationMinutes : '30';
+        const buttonText = existing ? 'Remove' : 'Add';
+        const isActive = existing ? true : false;
+        
+        if (existing) {
+          availabilityItems.push({
+            dayOfWeek: day,
+            startTime: startValue,
+            endTime: endValue,
+            slotDurationMinutes: existing.slotDurationMinutes
+          });
+        }
+        
+        return `
+        <div style="border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-bottom: 12px; ${isActive ? 'background: rgba(37,99,235,0.1);' : ''}">
+          <div style="font-weight: 600; margin-bottom: 8px;">${day} ${isActive ? '<span class="badge badge-success" style="font-size: 10px; margin-left: 8px;">Set</span>' : ''}</div>
+          <div class="grid">
+            <div class="field">
+              <label>Start Time</label>
+              <input type="time" data-day="${day}" data-field="start" value="${startValue}" />
+            </div>
+            <div class="field">
+              <label>End Time</label>
+              <input type="time" data-day="${day}" data-field="end" value="${endValue}" />
+            </div>
+            <div class="field">
+              <label>Slot Duration (minutes)</label>
+              <input type="number" data-day="${day}" data-field="duration" min="5" max="480" value="${durationValue}" />
+            </div>
+            <div class="field">
+              <button class="btn ${isActive ? 'btn-danger' : 'btn-ghost'}" data-day="${day}" onclick="toggleAvailability('${day}')">${buttonText}</button>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+      document.getElementById('availabilityForm').innerHTML = formHtml;
+    } catch (e) {
+      console.error('Error in loadAvailability:', e);
+      document.getElementById('currentAvailability').innerHTML = '<div class="empty">Error loading availability. Please refresh the page.</div>';
+      document.getElementById('availabilityForm').innerHTML = '<div class="empty">Error loading form. Please refresh the page.</div>';
+    }
+  }
+
+  window.toggleAvailability = function(day) {
+    const startInput = document.querySelector(`input[data-day="${day}"][data-field="start"]`);
+    const endInput = document.querySelector(`input[data-day="${day}"][data-field="end"]`);
+    const durationInput = document.querySelector(`input[data-day="${day}"][data-field="duration"]`);
+    const dayContainer = startInput.closest('div[style*="border"]');
+    const button = dayContainer.querySelector('button');
+    
+    const start = startInput.value;
+    const end = endInput.value;
+    const duration = durationInput.value;
+
+    const index = availabilityItems.findIndex(item => item.dayOfWeek === day);
+    if (index >= 0) {
+      // Remove from list
+      availabilityItems.splice(index, 1);
+      startInput.value = '';
+      endInput.value = '';
+      durationInput.value = '30';
+      button.textContent = 'Add';
+      button.className = 'btn btn-ghost';
+      dayContainer.style.background = '';
+      // Remove badge if exists
+      const dayLabel = dayContainer.querySelector('div[style*="font-weight: 600"]');
+      dayLabel.innerHTML = dayLabel.innerHTML.replace(/<span[^>]*>Set<\/span>/, '');
+    } else {
+      // Validate before adding
+      if (!start || !end || !duration) {
+        alert('Please fill all fields');
+        return;
+      }
+      // Add to list
+      availabilityItems.push({
+        dayOfWeek: day,
+        startTime: start,
+        endTime: end,
+        slotDurationMinutes: parseInt(duration)
+      });
+      button.textContent = 'Remove';
+      button.className = 'btn btn-danger';
+      dayContainer.style.background = 'rgba(37,99,235,0.1)';
+      // Add badge
+      const dayLabel = dayContainer.querySelector('div[style*="font-weight: 600"]');
+      if (!dayLabel.innerHTML.includes('Set')) {
+        dayLabel.innerHTML += ' <span class="badge badge-success" style="font-size: 10px; margin-left: 8px;">Set</span>';
+      }
+    }
+  };
+
+  async function saveAvailability() {
+    if (availabilityItems.length === 0) {
+      setStatus('availabilityStatus', 'Please add at least one availability window', 'error');
+      return;
+    }
+
+    try {
+      setStatus('availabilityStatus', 'Saving...', 'info');
+      const res = await fetch(`/api/v1/interviewers/${currentInterviewerId}/weekly-availability`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(availabilityItems)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus('availabilityStatus', err.message || 'Failed to save availability', 'error');
+        return;
+      }
+
+      setStatus('availabilityStatus', 'Availability saved successfully!', 'success');
+      availabilityItems = [];
+      setTimeout(() => loadAvailability(), 500);
+    } catch (e) {
+      console.error(e);
+      setStatus('availabilityStatus', 'Error saving availability', 'error');
+    }
+  }
+
+  async function updateMaxWeekly() {
+    const max = document.getElementById('maxWeeklyInput').value;
+    if (!max || max < 1) {
+      setStatus('updateStatus', 'Please enter a valid number', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/v1/interviewers/${currentInterviewerId}/max-weekly-interviews?maxWeeklyInterviews=${max}`, {
+        method: 'PATCH'
+      });
+
+      if (!res.ok) {
+        setStatus('updateStatus', 'Failed to update', 'error');
+        return;
+      }
+
+      setStatus('updateStatus', 'Updated successfully!', 'success');
+      setTimeout(() => loadInterviewerInfo(), 500);
+    } catch (e) {
+      console.error(e);
+      setStatus('updateStatus', 'Error updating', 'error');
+    }
+  }
+
+  async function generateSlots() {
+    const fromDate = document.getElementById('slotFromDate').value;
+    const toDate = document.getElementById('slotToDate').value;
+
+    if (!fromDate || !toDate) {
+      setStatus('generateStatus', 'Please select from and to dates', 'error');
+      return;
+    }
+
+    try {
+      setStatus('generateStatus', 'Generating slots...', 'info');
+      const res = await fetch(`/api/v1/interviewers/${currentInterviewerId}/generate-slots?from=${fromDate}&to=${toDate}`, {
+        method: 'POST'
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus('generateStatus', err.message || 'Failed to generate slots', 'error');
+        return;
+      }
+
+      const count = await res.text();
+      setStatus('generateStatus', `Generated ${count} slots successfully!`, 'success');
+      setTimeout(() => loadSlots(), 500);
+    } catch (e) {
+      console.error(e);
+      setStatus('generateStatus', 'Error generating slots', 'error');
+    }
+  }
+
+  async function loadSlots() {
+    try {
+      console.log('Loading slots for interviewer:', currentInterviewerId);
+      
+      // Fetch slots with a wider date range to include all generated slots
+      const now = new Date();
+      const fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
+      const toDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days ahead
+      
+      const fromISO = fromDate.toISOString().slice(0, 19);
+      const toISO = toDate.toISOString().slice(0, 19);
+      
+      const url = `/api/v1/slots?interviewerId=${currentInterviewerId}&limit=100&from=${encodeURIComponent(fromISO)}&to=${encodeURIComponent(toISO)}`;
+      console.log('Fetching slots from:', url);
+      
+      const res = await fetch(url);
+      
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: 'Failed to load slots' }));
+        console.error('Error loading slots:', error);
+        document.getElementById('slotsContainer').innerHTML = `<div class="empty">Error loading slots: ${error.message || 'Unknown error'}</div>`;
+        return;
+      }
+      
+      const data = await res.json();
+      console.log('Slots response:', data);
+      const slots = data.items || [];
+
+      if (slots.length === 0) {
+        document.getElementById('slotsContainer').innerHTML = '<div class="empty">No slots found. Generate some slots first using the form above.</div>';
+        return;
+      }
+
+      // Sort slots by start time
+      slots.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+      const currentTime = new Date();
+      const upcomingSlots = slots.filter(s => new Date(s.startTime) >= currentTime);
+      const pastSlots = slots.filter(s => new Date(s.startTime) < currentTime);
+
+      let html = '<h4 style="margin-top: 0;">Upcoming Slots (' + upcomingSlots.length + ')</h4>';
+      if (upcomingSlots.length === 0) {
+        html += '<div class="empty">No upcoming slots</div>';
+      } else {
+        html += '<table><thead><tr><th>Slot ID</th><th>Start Time</th><th>End Time</th><th>Available Capacity</th><th>Status</th></tr></thead><tbody>';
+        html += upcomingSlots.map(slot => `
+          <tr>
+            <td>${slot.slotId}</td>
+            <td>${new Date(slot.startTime).toLocaleString()}</td>
+            <td>${new Date(slot.endTime).toLocaleString()}</td>
+            <td>${slot.availableCapacity}</td>
+            <td><span class="badge ${slot.availableCapacity > 0 ? 'badge-success' : ''}">${slot.availableCapacity > 0 ? 'Available' : 'Full'}</span></td>
+          </tr>
+        `).join('');
+        html += '</tbody></table>';
+      }
+
+      if (pastSlots.length > 0) {
+        html += '<h4 style="margin-top: 24px;">Past Slots (' + pastSlots.length + ')</h4>';
+        html += '<table><thead><tr><th>Slot ID</th><th>Start Time</th><th>End Time</th><th>Available Capacity</th><th>Status</th></tr></thead><tbody>';
+        html += pastSlots.slice(0, 50).map(slot => `
+          <tr>
+            <td>${slot.slotId}</td>
+            <td>${new Date(slot.startTime).toLocaleString()}</td>
+            <td>${new Date(slot.endTime).toLocaleString()}</td>
+            <td>${slot.availableCapacity}</td>
+            <td><span class="badge">Past</span></td>
+          </tr>
+        `).join('');
+        html += '</tbody></table>';
+        if (pastSlots.length > 50) {
+          html += `<div style="margin-top: 12px; color: var(--muted); font-size: 13px;">Showing first 50 of ${pastSlots.length} past slots</div>`;
+        }
+      }
+
+      document.getElementById('slotsContainer').innerHTML = html;
+    } catch (e) {
+      console.error('Error in loadSlots:', e);
+      document.getElementById('slotsContainer').innerHTML = '<div class="empty">Error loading slots: ' + e.message + '</div>';
+    }
+  }
+
+  async function loadBookings() {
+    try {
+      const res = await fetch(`/api/v1/bookings/by-interviewer/${currentInterviewerId}`);
+      const bookings = await res.json();
+
+      if (bookings.length === 0) {
+        document.getElementById('bookingsContainer').innerHTML = '<div class="empty">No bookings found</div>';
+        return;
+      }
+
+      const now = new Date();
+      const upcoming = bookings.filter(b => new Date(b.startTime) >= now);
+      const past = bookings.filter(b => new Date(b.startTime) < now);
+
+      let html = '<h4 style="margin-top: 0;">Upcoming Bookings</h4>';
+      if (upcoming.length === 0) {
+        html += '<div class="empty">No upcoming bookings</div>';
+      } else {
+        html += '<table><thead><tr><th>Candidate Name</th><th>Email</th><th>Start Time</th><th>End Time</th><th>Slot ID</th><th>Actions</th></tr></thead><tbody>';
+        html += upcoming.map(booking => {
+          const safeName = booking.candidateName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          return `
+          <tr>
+            <td>${booking.candidateName}</td>
+            <td>${booking.candidateEmail}</td>
+            <td>${new Date(booking.startTime).toLocaleString()}</td>
+            <td>${new Date(booking.endTime).toLocaleString()}</td>
+            <td>${booking.slotId}</td>
+            <td>
+              <button class="btn btn-danger" onclick="deleteBooking(${booking.bookingId}, '${safeName}', ${booking.slotId})" style="padding: 6px 12px; font-size: 12px;">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+        }).join('');
+        html += '</tbody></table>';
+      }
+
+      if (past.length > 0) {
+        html += '<h4 style="margin-top: 24px;">Past Bookings</h4>';
+        html += '<table><thead><tr><th>Candidate Name</th><th>Email</th><th>Start Time</th><th>End Time</th><th>Slot ID</th></tr></thead><tbody>';
+        html += past.slice(0, 20).map(booking => `
+          <tr>
+            <td>${booking.candidateName}</td>
+            <td>${booking.candidateEmail}</td>
+            <td>${new Date(booking.startTime).toLocaleString()}</td>
+            <td>${new Date(booking.endTime).toLocaleString()}</td>
+            <td>${booking.slotId}</td>
+          </tr>
+        `).join('');
+        html += '</tbody></table>';
+      }
+
+      document.getElementById('bookingsContainer').innerHTML = html;
+    } catch (e) {
+      console.error(e);
+      document.getElementById('bookingsContainer').innerHTML = '<div class="empty">Error loading bookings</div>';
+    }
+  }
+
+  async function deleteBooking(bookingId, candidateName, slotId) {
+    if (!confirm(`Are you sure you want to delete the booking for ${candidateName}?\n\nThis will cancel their interview slot (Slot ID: ${slotId}) and make it available again for other candidates.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/v1/bookings/${bookingId}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(`Failed to delete booking: ${err.message || 'Unknown error'}`);
+        return;
+      }
+
+      alert(`Booking deleted successfully! Slot ${slotId} is now available again.`);
+      // Reload bookings and stats
+      await Promise.all([
+        loadBookings(),
+        loadStats(),
+        loadSlots()
+      ]);
+    } catch (e) {
+      console.error(e);
+      alert('Error deleting booking. Please try again.');
+    }
+  }
+
+  // Make deleteBooking available globally
+  window.deleteBooking = deleteBooking;
+
+  function setStatus(id, message, type) {
+    const el = document.getElementById(id);
+    el.textContent = message || '';
+    el.className = 'status ' + (type || '');
+  }
+
+  // Set default dates for slot generation
+  (() => {
+    const today = new Date();
+    const to = new Date();
+    to.setDate(today.getDate() + 14);
+    document.getElementById('slotFromDate').value = today.toISOString().slice(0,10);
+    document.getElementById('slotToDate').value = to.toISOString().slice(0,10);
+  })();
+</script>
+</body>
+</html>
+
