@@ -1,6 +1,7 @@
 spring:
   datasource:
     # Override with env vars DB_URL/DB_USERNAME/DB_PASSWORD for your local credentials
+    # For Render: DB_URL will be provided automatically from the database service
     url: ${DB_URL:jdbc:mysql://localhost:3306/interview_scheduler}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
@@ -10,10 +11,10 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
-    show-sql: true
+        format_sql: ${FORMAT_SQL:true}
+    show-sql: ${SHOW_SQL:true}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 
